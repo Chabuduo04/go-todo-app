@@ -2,7 +2,7 @@ package routes
 
 import (
     "github.com/gin-gonic/gin"
-    "go-todo-app/internal/controllers"
+    "github.com/Chabuduo04/go-todo-app/internal/controllers"
 )
 
 func SetupRoutes(r *gin.Engine) {

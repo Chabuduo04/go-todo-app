@@ -1,14 +1,14 @@
 package database
 
 import (
-    "fmt"
+    //"fmt"
     "log"
     "os"
 
     "gorm.io/gorm"
     "gorm.io/driver/mysql"
     "github.com/joho/godotenv"
-    "go-todo-app/internal/models"
+    "github.com/Chabuduo04/go-todo-app/internal/models"
 )
 
 var DB *gorm.DB
@@ -25,7 +25,7 @@ func InitDB() {
         log.Fatal("Failed to connect database:", err)
     }
 
-    // ×Ô¶¯Ç¨ÒÆ
+    // è‡ªåŠ¨è¿ç§»
     err = db.AutoMigrate(&models.User{}, &models.Task{})
     if err != nil {
         log.Fatal("AutoMigrate failed:", err)
