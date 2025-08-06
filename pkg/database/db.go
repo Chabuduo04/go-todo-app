@@ -26,7 +26,7 @@ func InitDB() {
     }
 
     // 自动迁移
-    err = db.AutoMigrate(&models.User{}, &models.Task{})
+    err = db.AutoMigrate(&models.User{}, &models.Todo{})
     if err != nil {
         log.Fatal("AutoMigrate failed:", err)
     }
