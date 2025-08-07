@@ -9,7 +9,7 @@ func SetupRoutes(r *gin.Engine) {
     r.POST("/register", controllers.Register)
     r.POST("/login", controllers.Login)
 
-    todo := r.Group("/todo")
+    todo := r.Group("/todos")
     {
         todo.GET("", controllers.GetTodos)
         todo.POST("", controllers.CreateTodo)
