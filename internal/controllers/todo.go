@@ -15,6 +15,9 @@ func CreateTodo(c *gin.Context) {
         return
     }
 
+    userID := c.MustGet("userID").(uint)
+    todo.UserID = userID
+
     if err := database.DB.Create(&todo).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create todo"})
         return
@@ -25,7 +28,8 @@ func CreateTodo(c *gin.Context) {
 
 func GetTodos(c *gin.Context) {
     var todos []models.Todo
-    if err := database.DB.Find(&todos).Error; err != nil {
+    userID := c.MustGet("userID").(uint)
+    if err := database.DB.Where("user_id = ?", userID).Find(&todos).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch todos"})
         return
     }
@@ -35,9 +39,10 @@ func GetTodos(c *gin.Context) {
 
 func UpdateTodo(c *gin.Context) {
     id := c.Param("id")
+    userID := c.MustGet("userID").(uint)
     var todo models.Todo
 
-    if err := database.DB.First(&todo, id).Error; err != nil {
+    if err := database.DB.Where("id = ? AND user_id = ?", id, userID).First(&todo).Error; err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "todo not found"})
         return
     }
@@ -57,7 +62,8 @@ func UpdateTodo(c *gin.Context) {
 
 func DeleteTodo(c *gin.Context) {
     id := c.Param("id")
-    if err := database.DB.Delete(&models.Todo{}, id).Error; err != nil {
+    userID := c.MustGet("userID").(uint)
+    if err := database.DB.Where("id = ? AND user_id = ?", id, userID).Delete(&models.Todo{}).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete todo"})
         return
     }

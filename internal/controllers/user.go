@@ -4,6 +4,7 @@ import (
     "net/http"
     "github.com/Chabuduo04/go-todo-app/pkg/database"
     "github.com/Chabuduo04/go-todo-app/internal/models"
+	"github.com/Chabuduo04/go-todo-app/internal/utils"
 
     "github.com/gin-gonic/gin"
     "golang.org/x/crypto/bcrypt"
@@ -44,15 +45,21 @@ func Login(c *gin.Context) {
 
     // 查询用户
     if err := database.DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid username or password"})
         return
     }
 
     // 验证密码
     if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid password"})
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid username or password"})
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{"message": "login success"})
+	token, err := utils.GenerateJWT(user.ID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "login success", "token": token})
 }
