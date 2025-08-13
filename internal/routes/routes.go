@@ -2,18 +2,20 @@ package routes
 
 import (
     "github.com/gin-gonic/gin"
-    "go-todo-app/internal/controllers"
+    "github.com/Chabuduo04/go-todo-app/internal/controllers"
+    "github.com/Chabuduo04/go-todo-app/internal/middleware"
 )
 
 func SetupRoutes(r *gin.Engine) {
     r.POST("/register", controllers.Register)
     r.POST("/login", controllers.Login)
 
-    todo := r.Group("/todo")
+    auth := r.Group("/")
+    auth.Use(middleware.AuthMiddleware())
     {
-        todo.GET("", controllers.GetTodos)
-        todo.POST("", controllers.CreateTodo)
-        todo.PUT("/:id", controllers.UpdateTodo)
-        todo.DELETE("/:id", controllers.DeleteTodo)
+        auth.GET("/todos", controllers.GetTodos)
+        auth.POST("/todos", controllers.CreateTodo)
+        auth.PUT("/todos/:id", controllers.UpdateTodo)
+        auth.DELETE("/todos/:id", controllers.DeleteTodo)
     }
 }
