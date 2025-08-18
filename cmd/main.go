@@ -4,6 +4,7 @@ import (
 	_ "github.com/Chabuduo04/go-todo-app/docs"
 	"github.com/Chabuduo04/go-todo-app/internal/routes"
 	"github.com/Chabuduo04/go-todo-app/pkg/database"
+	"github.com/Chabuduo04/go-todo-app/internal/config"
 	"github.com/gin-gonic/gin"
 
 	swaggerFiles "github.com/swaggo/files"
@@ -19,6 +20,8 @@ import (
 // @in header
 // @name Authorization
 func main() {
+	// 初始化配置
+	config.InitConfig()
 	database.InitDB()
 
 	r := gin.Default()

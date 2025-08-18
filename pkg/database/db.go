@@ -3,32 +3,23 @@ package database
 import (
     "fmt"
     "log"
-    "os"
 
     "gorm.io/gorm"
     "gorm.io/driver/mysql"
-    "github.com/joho/godotenv"
     "github.com/Chabuduo04/go-todo-app/internal/models"
+    "github.com/Chabuduo04/go-todo-app/internal/config"
 )
 
 var DB *gorm.DB
 
 func InitDB() {
-    // 读取 .env
-    err := godotenv.Load(".env")
-    if err != nil {
-        log.Fatal("Error loading .env file")
-    }
-
-    // 从环境变量读取
-	dbUser := os.Getenv("DB_USER")
-	dbPass := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-
-    dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-        dbUser, dbPass, dbHost, dbPort, dbName)
+    dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+        config.AppConfig.DBUser,
+        config.AppConfig.DBPass,
+        config.AppConfig.DBHost,
+        config.AppConfig.DBPort,
+        config.AppConfig.DBName,
+    )
     db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
     if err != nil {
         log.Fatal("Failed to connect database:", err)

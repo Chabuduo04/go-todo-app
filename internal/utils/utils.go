@@ -3,9 +3,9 @@ package utils
 import (
     "time"
     "github.com/golang-jwt/jwt/v5"
-)
 
-var jwtKey = []byte("your-secret-key")
+    "github.com/Chabuduo04/go-todo-app/internal/config"
+)
 
 type Claims struct {
     UserID uint `json:"user_id"`
@@ -23,13 +23,13 @@ func GenerateJWT(userID uint) (string, error) {
     }
 
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    return token.SignedString(jwtKey)
+    return token.SignedString(config.AppConfig.JwtSecret)
 }
 
 func ParseJWT(tokenStr string) (*Claims, error) {
     claims := &Claims{}
     token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-        return jwtKey, nil
+        return config.AppConfig.JwtSecret, nil
     })
     if err != nil || !token.Valid {
         return nil, err
