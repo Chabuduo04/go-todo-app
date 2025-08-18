@@ -7,7 +7,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env
 
@@ -15,6 +16,11 @@ services:
     image: mysql:8.0
     container_name: todo_db
     restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p123456"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: todo_app
