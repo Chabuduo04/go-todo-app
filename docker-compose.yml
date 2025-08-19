@@ -16,14 +16,14 @@ services:
     image: mysql:8.0
     container_name: todo_db
     restart: always
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-p123456"]
-      interval: 5s
-      timeout: 10s
-      retries: 10
+    env_file:
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: todo_app
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -p$${MYSQL_ROOT_PASSWORD} || exit 1"]
+      start_period: 10s
     ports:
       - "3306:3306"
     volumes:

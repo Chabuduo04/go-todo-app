@@ -32,7 +32,7 @@ func InitConfig() {
 		DBHost:    getEnv("DB_HOST", "localhost"),
 		DBPort:    getEnvAsInt("DB_PORT", 3306),
 		DBUser:    getEnvRequired("DB_USER"), // 必须显式配置
-		DBPass:    getEnvRequired("DB_PASS"), // 必须显式配置
+		DBPass:    getEnvRequired("DB_PASSWORD"), // 必须显式配置
 		DBName:    getEnv("DB_NAME", "todo_db"),
 	}
 
