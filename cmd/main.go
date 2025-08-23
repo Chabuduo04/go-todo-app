@@ -23,6 +23,7 @@ func main() {
 	// 初始化配置
 	config.InitConfig()
 	database.InitDB()
+	database.InitRedis()
 
 	r := gin.Default()
 	routes.SetupRoutes(r)

@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/Chabuduo04/go-todo-app/internal/models"
 	"github.com/Chabuduo04/go-todo-app/pkg/database"
@@ -35,10 +38,14 @@ func CreateTodo(c *gin.Context) {
 		return
 	}
 
+	// 删除缓存（保证下次读取时能查到新数据）
+	cacheKey := fmt.Sprintf("todos:user:%d", userID)
+	database.RDB.Del(database.Ctx, cacheKey)
+
 	c.JSON(http.StatusOK, gin.H{"message": "todo created successfully", "todo": todo})
 }
 
-// GetTodo godoc
+// GetTodos godoc
 // @Summary 获取 Todo
 // @Description 获取 Todo 任务
 // @Tags todo
@@ -49,14 +56,31 @@ func CreateTodo(c *gin.Context) {
 // @Router /todos [get]
 // @Security ApiKeyAuth
 func GetTodos(c *gin.Context) {
-    var todos []models.Todo
-    userID := c.MustGet("userID").(uint)
-    if err := database.DB.Where("user_id = ?", userID).Find(&todos).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch todos"})
-        return
-    }
+	var todos []models.Todo
+	userID := c.MustGet("userID").(uint)
 
-    c.JSON(http.StatusOK, gin.H{"todos": todos})
+	// 1. 先从 Redis 查
+	cacheKey := fmt.Sprintf("todos:user:%d", userID)
+	val, err := database.RDB.Get(database.Ctx, cacheKey).Result()
+	if err == nil {
+		// 命中缓存
+		if jsonErr := json.Unmarshal([]byte(val), &todos); jsonErr == nil {
+			c.JSON(http.StatusOK, gin.H{"todos": todos, "from": "cache"})
+			return
+		}
+	}
+
+	// 2. 缓存未命中，从数据库查
+	if err := database.DB.Where("user_id = ?", userID).Find(&todos).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch todos"})
+		return
+	}
+
+	// 3. 存入缓存，设置过期时间
+	data, _ := json.Marshal(todos)
+	database.RDB.Set(database.Ctx, cacheKey, data, 5*time.Minute)
+
+	c.JSON(http.StatusOK, gin.H{"todos": todos, "from": "db"})
 }
 
 // UpdateTodo godoc
@@ -92,6 +116,10 @@ func UpdateTodo(c *gin.Context) {
 		return
 	}
 
+	// 删除缓存
+	cacheKey := fmt.Sprintf("todos:user:%d", userID)
+	database.RDB.Del(database.Ctx, cacheKey)
+
 	c.JSON(http.StatusOK, gin.H{"message": "todo updated successfully", "todo": todo})
 }
 
@@ -113,6 +141,10 @@ func DeleteTodo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete todo"})
 		return
 	}
+
+	// 删除缓存
+	cacheKey := fmt.Sprintf("todos:user:%d", userID)
+	database.RDB.Del(database.Ctx, cacheKey)
 
 	c.JSON(http.StatusOK, gin.H{"message": "todo deleted successfully"})
 }

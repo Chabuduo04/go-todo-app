@@ -16,6 +16,10 @@ type Config struct {
 	DBUser    string
 	DBPass    string
 	DBName    string
+	RedisHost string
+	RedisPort string
+	RedisPass string
+	RedisDB   int
 }
 
 var AppConfig *Config
@@ -27,13 +31,17 @@ func InitConfig() {
 
 	// 2. 从环境变量读取配置
 	AppConfig = &Config{
-		AppPort:   getEnv("APP_PORT", "8080"), // 普通配置，可有默认值
+		AppPort:   getEnv("APP_PORT", "8080"),           // 普通配置，可有默认值
 		JwtSecret: []byte(getEnvRequired("JWT_SECRET")), // 必须显式配置
 		DBHost:    getEnv("DB_HOST", "localhost"),
 		DBPort:    getEnvAsInt("DB_PORT", 3306),
-		DBUser:    getEnvRequired("DB_USER"), // 必须显式配置
+		DBUser:    getEnvRequired("DB_USER"),     // 必须显式配置
 		DBPass:    getEnvRequired("DB_PASSWORD"), // 必须显式配置
 		DBName:    getEnv("DB_NAME", "todo_db"),
+		RedisHost: getEnv("REDIS_HOST", "localhost"),
+		RedisPort: getEnv("REDIS_PORT", "6379"),
+		RedisPass: os.Getenv("REDIS_PASS"), // 可选
+		RedisDB:   getEnvAsInt("REDIS_DB", 0),
 	}
 
 }
@@ -54,7 +62,6 @@ func getEnvRequired(key string) string {
 	}
 	return value
 }
-
 
 // getEnvAsInt 读取整数环境变量
 func getEnvAsInt(key string, defaultVal int) int {
